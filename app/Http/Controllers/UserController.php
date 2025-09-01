@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 
 use App\Models\User;
+use App\Models\Unit;
 use App\Services\SearchService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -22,21 +23,46 @@ class UserController extends Controller
      */
     public function index($type)
     {
-        $data = User::where('type' , $type)->paginate(20);
+        $data = User::where('type', $type)
+            ->with(['plan', 'franchisor', 'franchisees', 'units'])
+            ->paginate(20);
 
-        $total_count = User::where('type' , $type)->count();
-        $total_active = User::where('type' , $type)->where('status', 'active')->count();
-        $total_inactive = User::where('type' , $type)->where('status', 'inactive')->count();
+        $total_count = User::where('type', $type)->count();
+        $total_active = User::where('type', $type)->where('status', 'active')->count();
+        $total_inactive = User::where('type', $type)->where('status', 'inactive')->count();
 
-        return view('dashboard.users' , compact('data', 'total_inactive', 'total_active', 'total_count', 'type'));
+        // Get plan statistics if viewing franchisors
+        $planStats = [];
+        if ($type == 'franchisor') {
+            $plans = \App\Models\Plan::active()->get();
+            foreach ($plans as $plan) {
+                $planStats[$plan->name] = User::where('type', $type)
+                    ->where('plan_id', $plan->id)
+                    ->count();
+            }
+        }
+
+        return view('dashboard.users', compact('data', 'total_inactive', 'total_active', 'total_count', 'type', 'planStats'));
     }
 
     public function units()
     {
-        $data = User::where('franchisor_id' , auth()->user()->id)->get();
+        $data = User::where('franchisor_id', auth()->user()->id)
+            ->with(['units', 'performances', 'royalties'])
+            ->get();
 
-        return view('dashboard.units' , compact('data'));
+        // Get units with performance data
+        $units = Unit::where('franchisor_id', auth()->user()->id)
+            ->with(['franchisee', 'performances', 'tasks'])
+            ->get();
 
+        // Calculate unit statistics
+        $totalUnits = $units->count();
+        $activeUnits = $units->where('status', 'active')->count();
+        $totalRevenue = $units->sum('revenue');
+        $averageRevenue = $totalUnits > 0 ? $totalRevenue / $totalUnits : 0;
+
+        return view('dashboard.units', compact('data', 'units', 'totalUnits', 'activeUnits', 'totalRevenue', 'averageRevenue'));
     }
 
     public function units_show($id)
@@ -310,6 +336,93 @@ class UserController extends Controller
 
         flash()->message('Data Updated Successfully');
 
+        return redirect()->back();
+    }
+
+    /**
+     * Update business information for a user.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function updateBusinessInfo(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        $user = User::find($request->get('user_id'));
+        
+        if (!$user || !$user->isFranchisor()) {
+            flash()->error('User not found or not a franchisor');
+            return redirect()->back();
+        }
+
+        // Update business information
+        $user->update([
+            'website' => $request->get('website'),
+            'legal_name' => $request->get('legal_name'),
+            'structure' => $request->get('structure'),
+            'tax_id' => $request->get('tax_id'),
+            'industry' => $request->get('industry'),
+            'funding_amount' => $request->get('funding_amount'),
+            'funding_source' => $request->get('funding_source'),
+            'business_phone' => $request->get('business_phone'),
+            'business_email' => $request->get('business_email'),
+        ]);
+
+        // Handle file uploads if provided
+        if ($request->hasFile('logo')) {
+            $logo = $request->file('logo');
+            $logoFileName = time() . '_' . $logo->getClientOriginalName();
+            $logoPath = '/uploads/business/' . $logoFileName;
+            $logo->move(public_path('uploads/business'), $logoFileName);
+            $user->logo_path = $logoPath;
+        }
+
+        if ($request->hasFile('disclosure_doc')) {
+            $disclosureDoc = $request->file('disclosure_doc');
+            $disclosureDocFileName = time() . '_' . $disclosureDoc->getClientOriginalName();
+            $disclosureDocPath = '/uploads/business/' . $disclosureDocFileName;
+            $disclosureDoc->move(public_path('uploads/business'), $disclosureDocFileName);
+            $user->disclosure_doc_path = $disclosureDocPath;
+        }
+
+        if ($request->hasFile('agreement_doc')) {
+            $agreementDoc = $request->file('agreement_doc');
+            $agreementDocFileName = time() . '_' . $agreementDoc->getClientOriginalName();
+            $agreementDocPath = '/uploads/business/' . $agreementDocFileName;
+            $agreementDoc->move(public_path('uploads/business'), $agreementDocFileName);
+            $user->agreement_doc_path = $agreementDocPath;
+        }
+
+        if ($request->hasFile('operations_doc')) {
+            $operationsDoc = $request->file('operations_doc');
+            $operationsDocFileName = time() . '_' . $operationsDoc->getClientOriginalName();
+            $operationsDocPath = '/uploads/business/' . $operationsDocFileName;
+            $operationsDoc->move(public_path('uploads/business'), $operationsDocFileName);
+            $user->operations_doc_path = $operationsDocPath;
+        }
+
+        if ($request->hasFile('guideline_doc')) {
+            $guidelineDoc = $request->file('guideline_doc');
+            $guidelineDocFileName = time() . '_' . $guidelineDoc->getClientOriginalName();
+            $guidelineDocPath = '/uploads/business/' . $guidelineDocFileName;
+            $guidelineDoc->move(public_path('uploads/business'), $guidelineDocFileName);
+            $user->guideline_doc_path = $guidelineDocPath;
+        }
+
+        if ($request->hasFile('legal_doc')) {
+            $legalDoc = $request->file('legal_doc');
+            $legalDocFileName = time() . '_' . $legalDoc->getClientOriginalName();
+            $legalDocPath = '/uploads/business/' . $legalDocFileName;
+            $legalDoc->move(public_path('uploads/business'), $legalDocFileName);
+            $user->legal_doc_path = $legalDocPath;
+        }
+
+        $user->save();
+
+        flash()->success('Business information updated successfully');
         return redirect()->back();
     }
 

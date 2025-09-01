@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->string('type')->nullable();
+            $table->enum('type', ['admin', 'franchisor', 'franchisee', 'sales'])->default('franchisor');
             $table->string('status')->default('active');
             $table->integer('plan_id')->default(1);
             $table->integer('franchisor_id')->default(0);

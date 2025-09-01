@@ -82,8 +82,8 @@
                                                 <!--begin::Svg Icon | path:assets/media/svg/icons/Media/Equalizer.svg-->
                                                 <i class="icon-3x text-dark-50 flaticon-statistics"></i>                                                <!--end::Svg Icon-->
                                             </span>
-                                        <a href="" class="text-dark font-weight-bolder font-size-h2">
-                                         0  Pro Plan</a>
+                                                                                <a href="" class="text-dark font-weight-bolder font-size-h2">
+                                            {{ $planStats['Pro Plan'] ?? 0 }} Pro Plan</a>
                                     </div>
 
 
@@ -93,7 +93,7 @@
                                                 <i class="icon-3x text-dark-50 flaticon-statistics"></i>                                                <!--end::Svg Icon-->
                                             </span>
                                         <a href="" class="text-dark font-weight-bolder font-size-h2">
-                                            {{ DB::table('users')->where('plan_id' , 1)->count() }} Base Plan</a>
+                                            {{ $planStats['Base Plan'] ?? 0 }} Base Plan</a>
                                     </div>
                                 @else
                                     <div class="text-center col bg-white px-6 py-8 rounded-xl mr-7 mb-7">
@@ -228,39 +228,38 @@
                             </tr>
                             </thead>
                             <tbody>
-                            @foreach($data as $key => $row)
+                            @foreach($data as $user)
                             <tr>
-                                <td >
-                                    <span class="text-muted  font-weight-bold">A{{ $row['id']  }}  </span>
-                                </td>
-
-                                <td >
-                                    <span class="text-muted  font-weight-bold">{{ $row['name']  }}  </span>
+                                <td>
+                                    <span class="text-muted font-weight-bold">A{{ $user->id }}</span>
                                 </td>
 
                                 <td>
-                                    <span class="text-muted  font-weight-bold">{{ $row['brand_name']  }} </span>
-                                </td>
-
-                                <td >
-                                    <span class="text-muted  font-weight-bold">{{ $row['email']  }}  </span>
-                                </td>
-
-                                <td >
-                                    <span class="text-muted  font-weight-bold">{{ $row['last_login']  }}  </span>
-                                </td>
-
-                                <td >
-                                    <span class="text-muted  font-weight-bold">{{ $row['status']  }}  </span>
-                                </td>
-
-                                <td >
-                                    <span class="text-muted  font-weight-bold"> Base Plan </span>
+                                    <span class="text-muted font-weight-bold">{{ $user->getDisplayName() }}</span>
                                 </td>
 
                                 <td>
+                                    <span class="text-muted font-weight-bold">{{ $user->brand_name ?? 'N/A' }}</span>
+                                </td>
 
-                                    <a href="#" data-toggle="modal" data-target="#edit_item-{{ $row['id'] }}"  class="btn btn-icon btn-light btn-hover-primary btn-sm">
+                                <td>
+                                    <span class="text-muted font-weight-bold">{{ $user->email }}</span>
+                                </td>
+
+                                <td>
+                                    <span class="text-muted font-weight-bold">{{ $user->getLastLoginFormatted() }}</span>
+                                </td>
+
+                                <td>
+                                    <span class="{{ $user->getStatusBadgeClass() }}">{{ $user->status }}</span>
+                                </td>
+
+                                <td>
+                                    <span class="text-muted font-weight-bold">{{ $user->getPlanName() }}</span>
+                                </td>
+
+                                <td>
+                                    <a href="#" data-toggle="modal" data-target="#edit_item-{{ $user->id }}" class="btn btn-icon btn-light btn-hover-primary btn-sm">
                                         <span class="svg-icon svg-icon-md svg-icon-primary">
                                             <!--begin::Svg Icon | path:assets/media/svg/icons/Communication/Write.svg-->
                                             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
@@ -274,21 +273,20 @@
                                         </span>
                                     </a>
 
-                                    <a href="#" data-toggle="modal" data-target="#delete_record_modal" data-action="{{ route('user.delete' , $row->id) }}" data-id="{{ $row->id }}" class="open_delete_modal btn btn-icon btn-light btn-hover-primary btn-sm">
+                                    <a href="#" data-toggle="modal" data-target="#delete_record_modal" data-action="{{ route('user.delete', $user->id) }}" data-id="{{ $user->id }}" class="open_delete_modal btn btn-icon btn-light btn-hover-primary btn-sm">
                                         <span class="svg-icon svg-icon-md svg-icon-primary">
-                                                <!--begin::Svg Icon | path:assets/media/svg/icons/General/Trash.svg-->
-                                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
-                                                    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                                        <rect x="0" y="0" width="24" height="24" />
-                                                        <path d="M6,8 L6,20.5 C6,21.3284271 6.67157288,22 7.5,22 L16.5,22 C17.3284271,22 18,21.3284271 18,20.5 L18,8 L6,8 Z" fill="#000000" fill-rule="nonzero" />
-                                                        <path d="M14,4.5 L14,4 C14,3.44771525 13.5522847,3 13,3 L11,3 C10.4477153,3 10,3.44771525 10,4 L10,4.5 L5.5,4.5 C5.22385763,4.5 5,4.72385763 5,5 L5,5.5 C5,5.77614237 5.22385763,6 5.5,6 L18.5,6 C18.7761424,6 19,5.77614237 19,5.5 L19,5 C19,4.72385763 18.7761424,4.5 18.5,4.5 L14,4.5 Z" fill="#000000" opacity="0.3" />
-                                                    </g>
-                                                </svg>
+                                            <!--begin::Svg Icon | path:assets/media/svg/icons/General/Trash.svg-->
+                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                                                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                    <rect x="0" y="0" width="24" height="24" />
+                                                    <path d="M6,8 L6,20.5 C6,21.3284271 6.67157288,22 7.5,22 L16.5,22 C17.3284271,22 18,21.3284271 18,20.5 L18,8 L6,8 Z" fill="#000000" fill-rule="nonzero" />
+                                                    <path d="M14,4.5 L14,4 C14,3.44771525 13.5522847,3 13,3 L11,3 C10.4477153,3 10,3.44771525 10,4 L10,4.5 L5.5,4.5 C5.22385763,4.5 5,4.72385763 5,5 L5,5.5 C5,5.77614237 5.22385763,6 5.5,6 L18.5,6 C18.7761424,6 19,5.77614237 19,5.5 L19,5 C19,4.72385763 18.7761424,4.5 18.5,4.5 L14,4.5 Z" fill="#000000" opacity="0.3" />
+                                                </g>
+                                            </svg>
                                             <!--end::Svg Icon-->
-                                            </span>
-                                    </a >
+                                        </span>
+                                    </a>
                                 </td>
-
                             </tr>
                             @endforeach
                             </tbody>
@@ -373,8 +371,8 @@
         </div>
     </div>
 
-    @foreach($data as $row)
-        <div class="modal fade" id="edit_item-{{ $row['id'] }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalSizeSm" aria-hidden="true">
+    @foreach($data as $user)
+        <div class="modal fade" id="edit_item-{{ $user->id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalSizeSm" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-md" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -389,40 +387,40 @@
                             @csrf
                             <div class="card-body">
 
-                                <div  class="row form-group">
+                                <div class="row form-group">
 
-                                    <input style="text-transform: capitalize" hidden type="text" class="form-control  " name="id" value="{{ $row['id'] }}">
-                                    <input hidden type="text" class="form-control  " name="type" value="{{ $row['type'] }}">
+                                    <input style="text-transform: capitalize" hidden type="text" class="form-control" name="id" value="{{ $user->id }}">
+                                    <input hidden type="text" class="form-control" name="type" value="{{ $user->type }}">
 
 
                                     @if($type == "franchisor")
                                         <div class="col-12 col-md-12">
                                             <br>
-                                            <label  class=" form-control-label">Brand Name</label>
-                                            <input  type="text" class="form-control" name="brand_name" value="{{ $row['brand_name'] }}">
+                                            <label class="form-control-label">Brand Name</label>
+                                            <input type="text" class="form-control" name="brand_name" value="{{ $user->brand_name }}">
                                         </div>
                                     @endif
 
                                     <div class="col-12 col-md-12">
                                         <br>
-                                        <label  class=" form-control-label">Name</label>
-                                        <input required   type="text" class="form-control" name="first_name" value="{{ $row['name'] }}">
+                                        <label class="form-control-label">Name</label>
+                                        <input required type="text" class="form-control" name="first_name" value="{{ $user->name }}">
                                     </div>
 
 
                                     <div class="col-12 col-md-12">
                                         <br>
-                                        <label  class=" form-control-label">Email</label>
-                                        <input required type="email" class="form-control  " name="email" value="{{ $row['email'] }}">
+                                        <label class="form-control-label">Email</label>
+                                        <input required type="email" class="form-control" name="email" value="{{ $user->email }}">
                                     </div>
 
 
                                     <div class="col-12 col-md-12">
                                         <br>
-                                        <label  class=" form-control-label">Status</label>
+                                        <label class="form-control-label">Status</label>
                                         <select name="status" class="form-control">
-                                            <option @if($row['status'] == 'active') @endif >active</option>
-                                            <option @if($row['status'] == 'inactive') @endif>inactive</option>
+                                            <option @if($user->status == 'active') selected @endif>active</option>
+                                            <option @if($user->status == 'inactive') selected @endif>inactive</option>
                                         </select>
                                     </div>
 
@@ -432,7 +430,7 @@
                             </div>
 
                             <div class="card-footer">
-                                <button type="submit" class="btn btn-primary mr-2" >Submit</button>
+                                <button type="submit" class="btn btn-primary mr-2">Submit</button>
                                 <button type="reset" class="btn btn-secondary">Reset</button>
                             </div>
                         </form>

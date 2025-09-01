@@ -2054,67 +2054,294 @@ module.exports = {
 
 /***/ }),
 
-/***/ "./resources/js/app.js":
-/*!*****************************!*\
-  !*** ./resources/js/app.js ***!
-  \*****************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ "./node_modules/axios/package.json":
+/*!*****************************************!*\
+  !*** ./node_modules/axios/package.json ***!
+  \*****************************************/
+/***/ ((module) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _bootstrap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
-/* harmony import */ var claude_ai__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! claude-ai */ "./node_modules/claude-ai/index.js");
-
-
+module.exports = /*#__PURE__*/JSON.parse('{"name":"axios","version":"0.21.4","description":"Promise based HTTP client for the browser and node.js","main":"index.js","scripts":{"test":"grunt test","start":"node ./sandbox/server.js","build":"NODE_ENV=production grunt build","preversion":"npm test","version":"npm run build && grunt version && git add -A dist && git add CHANGELOG.md bower.json package.json","postversion":"git push && git push --tags","examples":"node ./examples/server.js","coveralls":"cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js","fix":"eslint --fix lib/**/*.js"},"repository":{"type":"git","url":"https://github.com/axios/axios.git"},"keywords":["xhr","http","ajax","promise","node"],"author":"Matt Zabriskie","license":"MIT","bugs":{"url":"https://github.com/axios/axios/issues"},"homepage":"https://axios-http.com","devDependencies":{"coveralls":"^3.0.0","es6-promise":"^4.2.4","grunt":"^1.3.0","grunt-banner":"^0.6.0","grunt-cli":"^1.2.0","grunt-contrib-clean":"^1.1.0","grunt-contrib-watch":"^1.0.0","grunt-eslint":"^23.0.0","grunt-karma":"^4.0.0","grunt-mocha-test":"^0.13.3","grunt-ts":"^6.0.0-beta.19","grunt-webpack":"^4.0.2","istanbul-instrumenter-loader":"^1.0.0","jasmine-core":"^2.4.1","karma":"^6.3.2","karma-chrome-launcher":"^3.1.0","karma-firefox-launcher":"^2.1.0","karma-jasmine":"^1.1.1","karma-jasmine-ajax":"^0.1.13","karma-safari-launcher":"^1.0.0","karma-sauce-launcher":"^4.3.6","karma-sinon":"^1.0.5","karma-sourcemap-loader":"^0.3.8","karma-webpack":"^4.0.2","load-grunt-tasks":"^3.5.2","minimist":"^1.2.0","mocha":"^8.2.1","sinon":"^4.5.0","terser-webpack-plugin":"^4.2.3","typescript":"^4.0.5","url-search-params":"^0.10.0","webpack":"^4.44.2","webpack-dev-server":"^3.11.0"},"browser":{"./lib/adapters/http.js":"./lib/adapters/xhr.js"},"jsdelivr":"dist/axios.min.js","unpkg":"dist/axios.min.js","typings":"./index.d.ts","dependencies":{"follow-redirects":"^1.14.0"},"bundlesize":[{"path":"./dist/axios.min.js","threshold":"5kB"}]}');
 
 /***/ }),
 
-/***/ "./resources/js/bootstrap.js":
-/*!***********************************!*\
-  !*** ./resources/js/bootstrap.js ***!
-  \***********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ "./node_modules/claude-ai/index.js":
+/*!*****************************************!*\
+  !*** ./node_modules/claude-ai/index.js ***!
+  \*****************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Claude: () => (/* binding */ Claude),
+/* harmony export */   Conversation: () => (/* binding */ Conversation),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* provided dependency */ var process = __webpack_require__(/*! process/browser.js */ "./node_modules/process/browser.js");
+class Claude {
+    constructor({ sessionKey, proxy }) {
+        if (typeof proxy === 'string') {
+            const HOST = proxy;
+            this.proxy = ({ endpoint, options }) => ({ endpoint: HOST + endpoint, options })
+        } else if (typeof proxy === 'function') {
+            this.proxy = proxy;
+        } else if (proxy) {
+            console.log('Proxy supported formats:\n\t({ endpoint /* endpoint (path) */, options /* fetch options */ }) => { endpoint /* full url */, options /* fetch options */ }');
+            console.log('Received proxy: ' + proxy);
+            throw new Error('Proxy must be a string (host) or a function');
+        }
+        if (!this.proxy) {
+            this.proxy = ({ endpoint, options }) => ({ endpoint: 'https://claude.ai/' + endpoint, options });
+        }
+        if (!sessionKey) {
+            throw new Error('Session key required');
+        }
+        if (!sessionKey.startsWith('sk-ant-sid01')) {
+            throw new Error('Session key invalid: Must be in the format sk-ant-sid01-*****');
+        }
+        this.sessionKey = sessionKey;
+    }
+    request(endpoint, options) {
+        if (!this.proxy) {
+            this.proxy = ({ endpoint, options }) => ({ endpoint: 'https://claude.ai/' + endpoint, options });
+        }
+        const proxied = this.proxy({ endpoint, options });
+        return fetch(proxied.endpoint, proxied.options);
+    }
+    async init() {
+        const organizations = await this.getOrganizations();
+        this.organizationId = organizations[0].uuid;
+        this.recent_conversations = await this.getConversations();
+    }
 
-window._ = (lodash__WEBPACK_IMPORTED_MODULE_0___default());
+    async getOrganizations() {
+        const response = await this.request("/api/organizations", {
+            headers: {
+                "content-type": "application/json",
+                "cookie": `sessionKey=${this.sessionKey}`
+            }
+        });
+        return await response.json().catch(errorHandle("getOrganizations"));
+    }
+    async clearConversations() {
+        const convos = await this.getConversations();
+        return Promise.all(convos.map(i => i.delete()))
+    }
+    async startConversation(message, params) {
+        const { uuid: convoID, name, summary, created_at, updated_at } = await this.request(`/api/organizations/${this.organizationId}/chat_conversations`, {
+            headers: {
+                "content-type": "application/json",
+                "cookie": `sessionKey=${this.sessionKey}`
+            },
+            method: 'POST',
+            body: JSON.stringify({
+                name: '',
+                uuid: uuid(),
+            })
+        }).then(r => r.json()).catch(errorHandle("startConversation create"));
+        const convo = new Conversation(this, { conversationId: convoID, name, summary, created_at, updated_at });
+        await convo.sendMessage(message, params)
+        await this.request(`/api/generate_chat_title`, {
+            headers: {
+                "content-type": "application/json",
+                "cookie": `sessionKey=${this.sessionKey}`
+            },
+            body: JSON.stringify({
+                organization_uuid: this.organizationId,
+                conversation_uuid: convoID,
+                message_content: message,
+                recent_titles: this.recent_conversations.map(i => i.name),
+            }),
+            method: 'POST'
+        }).then(r => r.json()).catch(errorHandle("startConversation generate_chat_title"));
+        return convo;
+    }
+    async getConversations() {
+        const response = await this.request(`/api/organizations/${this.organizationId}/chat_conversations`, {
+            headers: {
+                "content-type": "application/json",
+                "cookie": `sessionKey=${this.sessionKey}`
+            }
+        });
+        const json = await response.json();
+        return json.map(convo => new Conversation(this, { conversationId: convo.uuid, ...convo }));
+    }
+    async uploadFile(file) {
+        const { content, isText } = await readAsText(file);
+        if (isText) {
+            console.log(`Extracted ${content.length} characters from ${file.name}`);
+            return {
+                "file_name": file.name,
+                "file_type": file.type,
+                "file_size": file.size,
+                "extracted_content": content,
+            }
+        }
+        const fd = new FormData();
+        fd.append('file', file, file.name);
+        fd.append('orgUuid', this.organizationId);
+        const response = await this.request('/api/convert_document', {
+            headers: {
+                "cookie": `sessionKey=${this.sessionKey}`,
+            },
+            method: 'POST',
+            body: fd
+        });
+        let json;
+        try {
+            json = await response.json();
+        } catch (e) {
+            console.log("Couldn't parse JSON", response.status)
+            throw new Error('Invalid response when uploading ' + file.name);
+        }
+        if (response.status !== 200) {
+            console.log('Status not 200')
+            throw new Error('Invalid response when uploading ' + file.name);
+        }
+        if (!json.hasOwnProperty('extracted_content')) {
+            console.log(json);
+            throw new Error('Invalid response when uploading ' + file.name);
+        }
+        console.log(`Extracted ${json.extracted_content.length} characters from ${file.name}`);
+        return json;
+    }
+}
 
-/**
- * We'll load the axios HTTP library which allows us to easily issue requests
- * to our Laravel back-end. This library automatically handles sending the
- * CSRF token as a header based on the value of the "XSRF" token cookie.
- */
+class Conversation {
+    constructor(claude, { conversationId, name, summary, created_at, updated_at }) {
+        this.claude = claude;
+        this.conversationId = conversationId;
+        this.request = claude.request;
+        if (!this.claude) {
+            throw new Error('Claude not initialized');
+        }
+        if (!this.claude.sessionKey) {
+            throw new Error('Session key required');
+        }
+        if (!this.conversationId) {
+            throw new Error('Conversation ID required');
+        }
+        Object.assign(this, { name, summary, created_at, updated_at })
+    }
 
+    async sendMessage(message, { timezone = "America/New_York", attachments = [], model = "claude-2", done = () => { }, progress = () => { } } = {}) {
+        const body = {
+            organization_uuid: this.claude.organizationId,
+            conversation_uuid: this.conversationId,
+            text: message,
+            attachments,
+            completion: {
+                prompt: message,
+                timezone,
+                model,
+            }
+        };
+        const response = await this.request("/api/append_message", {
+            method: "POST",
+            headers: {
+                "accept": "text/event-stream,text/event-stream",
+                "content-type": "application/json",
+                "cookie": `sessionKey=${this.claude.sessionKey}`
+            },
+            body: JSON.stringify(body)
+        });
+        let resolve;
+        let returnPromise = new Promise(r => (resolve = r));
+        readStream(response, (a) => {
+            if (!a.toString().startsWith('data:')) {
+                return;
+            }
+            let parsed;
+            try {
+                parsed = JSON.parse(a.toString().replace(/^data\:/, '').split('\n\ndata:')[0]?.trim() || "{}");
+            } catch (e) {
+                return;
+            }
+            progress(parsed);
+            if (parsed.stop_reason === 'stop_sequence') {
+                done(parsed);
+                resolve(parsed);
+            }
+        })
+        return returnPromise;
+    }
+    async delete() {
+        return await this.request(`/api/organizations/${this.claude.organizationId}/chat_conversations/${this.conversationId}`, {
+            headers: {
+                "cookie": `sessionKey=${this.claude.sessionKey}`
+            },
+            method: 'DELETE'
+        }).catch(errorHandle("Delete conversation " + this.conversationId));
+    }
+    async getInfo() {
+        const response = await this.request(`/api/organizations/${this.claude.organizationId}/chat_conversations/${this.conversationId}`, {
+            headers: {
+                "content-type": "application/json",
+                "cookie": `sessionKey=${this.claude.sessionKey}`
+            }
+        });
+        return await response.json().catch(errorHandle("getInfo"));
+    }
+}
 
-window.axios = (axios__WEBPACK_IMPORTED_MODULE_1___default());
-window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+async function readStream(response, progressCallback) {
+    const reader = response.body.getReader();
+    let received = 0;
+    let chunks = [];
+    let loading = true;
+    while (loading) {
+        const { done, value } = await reader.read();
+        if (done) {
+            loading = false;
+            break;
+        }
+        chunks.push(value);
+        received += value?.length || 0;
+        if (value) { progressCallback(new TextDecoder('utf-8').decode(value)); }
+    }
 
-/**
- * Echo exposes an expressive API for subscribing to channels and listening
- * for events that are broadcast by Laravel. Echo and event broadcasting
- * allows your team to easily build robust real-time web applications.
- */
+    let body = new Uint8Array(received);
+    let position = 0;
 
-// import Echo from 'laravel-echo';
+    for (let chunk of chunks) {
+        body.set(chunk, position);
+        position += chunk.length;
+    }
 
-// import Pusher from 'pusher-js';
-// window.Pusher = Pusher;
+    return new TextDecoder('utf-8').decode(body);
+}
 
-// window.Echo = new Echo({
-//     broadcaster: 'pusher',
-//     key: import.meta.env.VITE_PUSHER_APP_KEY,
-//     cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER ?? 'mt1',
-//     wsHost: import.meta.env.VITE_PUSHER_HOST ? import.meta.env.VITE_PUSHER_HOST : `ws-${import.meta.env.VITE_PUSHER_APP_CLUSTER}.pusher.com`,
-//     wsPort: import.meta.env.VITE_PUSHER_PORT ?? 80,
-//     wssPort: import.meta.env.VITE_PUSHER_PORT ?? 443,
-//     forceTLS: (import.meta.env.VITE_PUSHER_SCHEME ?? 'https') === 'https',
-//     enabledTransports: ['ws', 'wss'],
-// });
+async function readAsText(file) {
+    const buf = await file.arrayBuffer();
+    // const allow = ['text', 'javascript', 'json', 'html', 'sh', 'xml', 'latex', 'ecmascript']
+    const notText = ['doc', 'pdf', 'ppt', 'xls']
+    return {
+        content: new TextDecoder('utf-8').decode(buf),
+        isText: !notText.find(i => file.name.includes(i))
+    }
+}
+
+function errorHandle(msg) {
+    return (e) => {
+        console.error(chalk.red.bold(`Error at: ${msg}`))
+        console.error(e);
+        process.exit(0);
+    }
+}
+
+function uuid() {
+    var h = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
+    var k = ['x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', '-', 'x', 'x', 'x', 'x', '-', '4', 'x', 'x', 'x', '-', 'y', 'x', 'x', 'x', '-', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'];
+    var u = '', i = 0, rb = Math.random() * 0xffffffff | 0;
+    while (i++ < 36) {
+        var c = k[i - 1], r = rb & 0xf, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        u += (c == '-' || c == '4') ? c : h[v]; rb = i % 8 == 0 ? Math.random() * 0xffffffff | 0 : rb >> 4
+    }
+    return u
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Claude);
 
 /***/ }),
 
@@ -19324,21 +19551,9 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/**
 		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
   }
   // Check for `exports` after `define` in case a build optimizer adds it.
-  else {}
+  else // removed by dead control flow
+{}
 }.call(this));
-
-
-/***/ }),
-
-/***/ "./resources/sass/app.scss":
-/*!*********************************!*\
-  !*** ./resources/sass/app.scss ***!
-  \*********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
 
 
 /***/ }),
@@ -19537,294 +19752,80 @@ process.umask = function() { return 0; };
 
 /***/ }),
 
-/***/ "./node_modules/claude-ai/index.js":
-/*!*****************************************!*\
-  !*** ./node_modules/claude-ai/index.js ***!
-  \*****************************************/
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+/***/ "./resources/js/app.js":
+/*!*****************************!*\
+  !*** ./resources/js/app.js ***!
+  \*****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   Claude: () => (/* binding */ Claude),
-/* harmony export */   Conversation: () => (/* binding */ Conversation),
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* provided dependency */ var process = __webpack_require__(/*! process/browser.js */ "./node_modules/process/browser.js");
-class Claude {
-    constructor({ sessionKey, proxy }) {
-        if (typeof proxy === 'string') {
-            const HOST = proxy;
-            this.proxy = ({ endpoint, options }) => ({ endpoint: HOST + endpoint, options })
-        } else if (typeof proxy === 'function') {
-            this.proxy = proxy;
-        } else if (proxy) {
-            console.log('Proxy supported formats:\n\t({ endpoint /* endpoint (path) */, options /* fetch options */ }) => { endpoint /* full url */, options /* fetch options */ }');
-            console.log('Received proxy: ' + proxy);
-            throw new Error('Proxy must be a string (host) or a function');
-        }
-        if (!this.proxy) {
-            this.proxy = ({ endpoint, options }) => ({ endpoint: 'https://claude.ai/' + endpoint, options });
-        }
-        if (!sessionKey) {
-            throw new Error('Session key required');
-        }
-        if (!sessionKey.startsWith('sk-ant-sid01')) {
-            throw new Error('Session key invalid: Must be in the format sk-ant-sid01-*****');
-        }
-        this.sessionKey = sessionKey;
-    }
-    request(endpoint, options) {
-        if (!this.proxy) {
-            this.proxy = ({ endpoint, options }) => ({ endpoint: 'https://claude.ai/' + endpoint, options });
-        }
-        const proxied = this.proxy({ endpoint, options });
-        return fetch(proxied.endpoint, proxied.options);
-    }
-    async init() {
-        const organizations = await this.getOrganizations();
-        this.organizationId = organizations[0].uuid;
-        this.recent_conversations = await this.getConversations();
-    }
+/* harmony import */ var _bootstrap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
+/* harmony import */ var claude_ai__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! claude-ai */ "./node_modules/claude-ai/index.js");
 
-    async getOrganizations() {
-        const response = await this.request("/api/organizations", {
-            headers: {
-                "content-type": "application/json",
-                "cookie": `sessionKey=${this.sessionKey}`
-            }
-        });
-        return await response.json().catch(errorHandle("getOrganizations"));
-    }
-    async clearConversations() {
-        const convos = await this.getConversations();
-        return Promise.all(convos.map(i => i.delete()))
-    }
-    async startConversation(message, params) {
-        const { uuid: convoID, name, summary, created_at, updated_at } = await this.request(`/api/organizations/${this.organizationId}/chat_conversations`, {
-            headers: {
-                "content-type": "application/json",
-                "cookie": `sessionKey=${this.sessionKey}`
-            },
-            method: 'POST',
-            body: JSON.stringify({
-                name: '',
-                uuid: uuid(),
-            })
-        }).then(r => r.json()).catch(errorHandle("startConversation create"));
-        const convo = new Conversation(this, { conversationId: convoID, name, summary, created_at, updated_at });
-        await convo.sendMessage(message, params)
-        await this.request(`/api/generate_chat_title`, {
-            headers: {
-                "content-type": "application/json",
-                "cookie": `sessionKey=${this.sessionKey}`
-            },
-            body: JSON.stringify({
-                organization_uuid: this.organizationId,
-                conversation_uuid: convoID,
-                message_content: message,
-                recent_titles: this.recent_conversations.map(i => i.name),
-            }),
-            method: 'POST'
-        }).then(r => r.json()).catch(errorHandle("startConversation generate_chat_title"));
-        return convo;
-    }
-    async getConversations() {
-        const response = await this.request(`/api/organizations/${this.organizationId}/chat_conversations`, {
-            headers: {
-                "content-type": "application/json",
-                "cookie": `sessionKey=${this.sessionKey}`
-            }
-        });
-        const json = await response.json();
-        return json.map(convo => new Conversation(this, { conversationId: convo.uuid, ...convo }));
-    }
-    async uploadFile(file) {
-        const { content, isText } = await readAsText(file);
-        if (isText) {
-            console.log(`Extracted ${content.length} characters from ${file.name}`);
-            return {
-                "file_name": file.name,
-                "file_type": file.type,
-                "file_size": file.size,
-                "extracted_content": content,
-            }
-        }
-        const fd = new FormData();
-        fd.append('file', file, file.name);
-        fd.append('orgUuid', this.organizationId);
-        const response = await this.request('/api/convert_document', {
-            headers: {
-                "cookie": `sessionKey=${this.sessionKey}`,
-            },
-            method: 'POST',
-            body: fd
-        });
-        let json;
-        try {
-            json = await response.json();
-        } catch (e) {
-            console.log("Couldn't parse JSON", response.status)
-            throw new Error('Invalid response when uploading ' + file.name);
-        }
-        if (response.status !== 200) {
-            console.log('Status not 200')
-            throw new Error('Invalid response when uploading ' + file.name);
-        }
-        if (!json.hasOwnProperty('extracted_content')) {
-            console.log(json);
-            throw new Error('Invalid response when uploading ' + file.name);
-        }
-        console.log(`Extracted ${json.extracted_content.length} characters from ${file.name}`);
-        return json;
-    }
-}
 
-class Conversation {
-    constructor(claude, { conversationId, name, summary, created_at, updated_at }) {
-        this.claude = claude;
-        this.conversationId = conversationId;
-        this.request = claude.request;
-        if (!this.claude) {
-            throw new Error('Claude not initialized');
-        }
-        if (!this.claude.sessionKey) {
-            throw new Error('Session key required');
-        }
-        if (!this.conversationId) {
-            throw new Error('Conversation ID required');
-        }
-        Object.assign(this, { name, summary, created_at, updated_at })
-    }
-
-    async sendMessage(message, { timezone = "America/New_York", attachments = [], model = "claude-2", done = () => { }, progress = () => { } } = {}) {
-        const body = {
-            organization_uuid: this.claude.organizationId,
-            conversation_uuid: this.conversationId,
-            text: message,
-            attachments,
-            completion: {
-                prompt: message,
-                timezone,
-                model,
-            }
-        };
-        const response = await this.request("/api/append_message", {
-            method: "POST",
-            headers: {
-                "accept": "text/event-stream,text/event-stream",
-                "content-type": "application/json",
-                "cookie": `sessionKey=${this.claude.sessionKey}`
-            },
-            body: JSON.stringify(body)
-        });
-        let resolve;
-        let returnPromise = new Promise(r => (resolve = r));
-        readStream(response, (a) => {
-            if (!a.toString().startsWith('data:')) {
-                return;
-            }
-            let parsed;
-            try {
-                parsed = JSON.parse(a.toString().replace(/^data\:/, '').split('\n\ndata:')[0]?.trim() || "{}");
-            } catch (e) {
-                return;
-            }
-            progress(parsed);
-            if (parsed.stop_reason === 'stop_sequence') {
-                done(parsed);
-                resolve(parsed);
-            }
-        })
-        return returnPromise;
-    }
-    async delete() {
-        return await this.request(`/api/organizations/${this.claude.organizationId}/chat_conversations/${this.conversationId}`, {
-            headers: {
-                "cookie": `sessionKey=${this.claude.sessionKey}`
-            },
-            method: 'DELETE'
-        }).catch(errorHandle("Delete conversation " + this.conversationId));
-    }
-    async getInfo() {
-        const response = await this.request(`/api/organizations/${this.claude.organizationId}/chat_conversations/${this.conversationId}`, {
-            headers: {
-                "content-type": "application/json",
-                "cookie": `sessionKey=${this.claude.sessionKey}`
-            }
-        });
-        return await response.json().catch(errorHandle("getInfo"));
-    }
-}
-
-async function readStream(response, progressCallback) {
-    const reader = response.body.getReader();
-    let received = 0;
-    let chunks = [];
-    let loading = true;
-    while (loading) {
-        const { done, value } = await reader.read();
-        if (done) {
-            loading = false;
-            break;
-        }
-        chunks.push(value);
-        received += value?.length || 0;
-        if (value) { progressCallback(new TextDecoder('utf-8').decode(value)); }
-    }
-
-    let body = new Uint8Array(received);
-    let position = 0;
-
-    for (let chunk of chunks) {
-        body.set(chunk, position);
-        position += chunk.length;
-    }
-
-    return new TextDecoder('utf-8').decode(body);
-}
-
-async function readAsText(file) {
-    const buf = await file.arrayBuffer();
-    // const allow = ['text', 'javascript', 'json', 'html', 'sh', 'xml', 'latex', 'ecmascript']
-    const notText = ['doc', 'pdf', 'ppt', 'xls']
-    return {
-        content: new TextDecoder('utf-8').decode(buf),
-        isText: !notText.find(i => file.name.includes(i))
-    }
-}
-
-function errorHandle(msg) {
-    return (e) => {
-        console.error(chalk.red.bold(`Error at: ${msg}`))
-        console.error(e);
-        process.exit(0);
-    }
-}
-
-function uuid() {
-    var h = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
-    var k = ['x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', '-', 'x', 'x', 'x', 'x', '-', '4', 'x', 'x', 'x', '-', 'y', 'x', 'x', 'x', '-', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'];
-    var u = '', i = 0, rb = Math.random() * 0xffffffff | 0;
-    while (i++ < 36) {
-        var c = k[i - 1], r = rb & 0xf, v = c == 'x' ? r : (r & 0x3 | 0x8);
-        u += (c == '-' || c == '4') ? c : h[v]; rb = i % 8 == 0 ? Math.random() * 0xffffffff | 0 : rb >> 4
-    }
-    return u
-}
-
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Claude);
 
 /***/ }),
 
-/***/ "./node_modules/axios/package.json":
-/*!*****************************************!*\
-  !*** ./node_modules/axios/package.json ***!
-  \*****************************************/
-/***/ ((module) => {
+/***/ "./resources/js/bootstrap.js":
+/*!***********************************!*\
+  !*** ./resources/js/bootstrap.js ***!
+  \***********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-module.exports = JSON.parse('{"_from":"axios@^0.21","_id":"axios@0.21.4","_inBundle":false,"_integrity":"sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==","_location":"/axios","_phantomChildren":{},"_requested":{"type":"range","registry":true,"raw":"axios@^0.21","name":"axios","escapedName":"axios","rawSpec":"^0.21","saveSpec":null,"fetchSpec":"^0.21"},"_requiredBy":["#DEV:/"],"_resolved":"https://registry.npmjs.org/axios/-/axios-0.21.4.tgz","_shasum":"c67b90dc0568e5c1cf2b0b858c43ba28e2eda575","_spec":"axios@^0.21","_where":"D:\\\\Laravel pros\\\\imageConverter","author":{"name":"Matt Zabriskie"},"browser":{"./lib/adapters/http.js":"./lib/adapters/xhr.js"},"bugs":{"url":"https://github.com/axios/axios/issues"},"bundleDependencies":false,"bundlesize":[{"path":"./dist/axios.min.js","threshold":"5kB"}],"dependencies":{"follow-redirects":"^1.14.0"},"deprecated":false,"description":"Promise based HTTP client for the browser and node.js","devDependencies":{"coveralls":"^3.0.0","es6-promise":"^4.2.4","grunt":"^1.3.0","grunt-banner":"^0.6.0","grunt-cli":"^1.2.0","grunt-contrib-clean":"^1.1.0","grunt-contrib-watch":"^1.0.0","grunt-eslint":"^23.0.0","grunt-karma":"^4.0.0","grunt-mocha-test":"^0.13.3","grunt-ts":"^6.0.0-beta.19","grunt-webpack":"^4.0.2","istanbul-instrumenter-loader":"^1.0.0","jasmine-core":"^2.4.1","karma":"^6.3.2","karma-chrome-launcher":"^3.1.0","karma-firefox-launcher":"^2.1.0","karma-jasmine":"^1.1.1","karma-jasmine-ajax":"^0.1.13","karma-safari-launcher":"^1.0.0","karma-sauce-launcher":"^4.3.6","karma-sinon":"^1.0.5","karma-sourcemap-loader":"^0.3.8","karma-webpack":"^4.0.2","load-grunt-tasks":"^3.5.2","minimist":"^1.2.0","mocha":"^8.2.1","sinon":"^4.5.0","terser-webpack-plugin":"^4.2.3","typescript":"^4.0.5","url-search-params":"^0.10.0","webpack":"^4.44.2","webpack-dev-server":"^3.11.0"},"homepage":"https://axios-http.com","jsdelivr":"dist/axios.min.js","keywords":["xhr","http","ajax","promise","node"],"license":"MIT","main":"index.js","name":"axios","repository":{"type":"git","url":"git+https://github.com/axios/axios.git"},"scripts":{"build":"NODE_ENV=production grunt build","coveralls":"cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js","examples":"node ./examples/server.js","fix":"eslint --fix lib/**/*.js","postversion":"git push && git push --tags","preversion":"npm test","start":"node ./sandbox/server.js","test":"grunt test","version":"npm run build && grunt version && git add -A dist && git add CHANGELOG.md bower.json package.json"},"typings":"./index.d.ts","unpkg":"dist/axios.min.js","version":"0.21.4"}');
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_1__);
+
+window._ = (lodash__WEBPACK_IMPORTED_MODULE_0___default());
+
+/**
+ * We'll load the axios HTTP library which allows us to easily issue requests
+ * to our Laravel back-end. This library automatically handles sending the
+ * CSRF token as a header based on the value of the "XSRF" token cookie.
+ */
+
+
+window.axios = (axios__WEBPACK_IMPORTED_MODULE_1___default());
+window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
+/**
+ * Echo exposes an expressive API for subscribing to channels and listening
+ * for events that are broadcast by Laravel. Echo and event broadcasting
+ * allows your team to easily build robust real-time web applications.
+ */
+
+// import Echo from 'laravel-echo';
+
+// import Pusher from 'pusher-js';
+// window.Pusher = Pusher;
+
+// window.Echo = new Echo({
+//     broadcaster: 'pusher',
+//     key: import.meta.env.VITE_PUSHER_APP_KEY,
+//     cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER ?? 'mt1',
+//     wsHost: import.meta.env.VITE_PUSHER_HOST ? import.meta.env.VITE_PUSHER_HOST : `ws-${import.meta.env.VITE_PUSHER_APP_CLUSTER}.pusher.com`,
+//     wsPort: import.meta.env.VITE_PUSHER_PORT ?? 80,
+//     wssPort: import.meta.env.VITE_PUSHER_PORT ?? 443,
+//     forceTLS: (import.meta.env.VITE_PUSHER_SCHEME ?? 'https') === 'https',
+//     enabledTransports: ['ws', 'wss'],
+// });
+
+/***/ }),
+
+/***/ "./resources/sass/app.scss":
+/*!*********************************!*\
+  !*** ./resources/sass/app.scss ***!
+  \*********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
 
 /***/ })
 

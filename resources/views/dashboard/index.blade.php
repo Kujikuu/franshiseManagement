@@ -34,7 +34,7 @@
                 <div class="d-flex align-items-baseline flex-wrap mr-5">
                     <!--begin::Page Title-->
                     <h2 style="color: #3a384e" class="d-flex align-items-center  font-weight-bolder my-1 mr-3">
-                        Financial overivew</h2>
+                        Financial Overview</h2>
                     <!--end::Page Title-->
                 </div>
                 <!--end::Page Heading-->
@@ -89,7 +89,7 @@
                                                 <i class="icon-3x text-dark-50 flaticon2-list-1"></i>                                                <!--end::Svg Icon-->
                                             </span>
                                                 <a href="" class="text-dark font-weight-bolder font-size-h2">
-                                                    {{ DB::table('users')->where('type', 'franchisee')->get()->count() }} Total Franchise</a>
+                                                    {{ $data['totalFranchisees'] ?? 0 }} Total Franchise</a>
                                         </div>
 
                                         <div class="text-center col bg-white px-6 py-8 rounded-xl mr-7 mb-7">
@@ -98,7 +98,7 @@
                                                 <i class="icon-3x text-dark-50 flaticon-statistics"></i>                                                <!--end::Svg Icon-->
                                             </span>
                                             <a href="" class="text-dark font-weight-bolder font-size-h2">
-                                                ${{ DB::table('users')->where('type', 'franchisee')->get()->count() }} Total Sales</a>
+                                                ${{ number_format($data['totalSales'] ?? 0, 2) }} Total Sales</a>
                                         </div>
 
 
@@ -108,7 +108,7 @@
                                                 <i class="icon-3x text-dark-50 flaticon2-list"></i>                                                <!--end::Svg Icon-->
                                             </span>
                                             <a href="" class="text-dark font-weight-bolder font-size-h2">
-                                                ${{ DB::table('users')->where('type', 'franchisee')->get()->count() }} Total Royalty</a>
+                                                ${{ number_format($data['totalRoyalties'] ?? 0, 2) }} Total Royalty</a>
                                         </div>
 
                                     </div>
@@ -129,7 +129,7 @@
                         <div class="card-header">
                             <div class="card-title">
                                 <h3 class="card-label">
-                                    Total Sales location
+                                    Total Sales by Location
                                 </h3>
                             </div>
                         </div>
@@ -152,7 +152,7 @@
                             <div class="card-header">
                                 <div class="card-title">
                                     <h3 class="card-label">
-                                        Top Franchise
+                                        Top Franchise Units
                                     </h3>
                                 </div>
                             </div>
@@ -172,8 +172,8 @@
                         <!--begin::Header-->
                         <div class="card-header border-0 py-5">
                             <h3 class="card-title align-items-start flex-column">
-                                <span class="card-label font-weight-bolder text-dark">Franchisor</span>
-                                <span class="text-muted mt-3 font-weight-bold font-size-sm"></span>
+                                <span class="card-label font-weight-bolder text-dark">Franchisors</span>
+                                <span class="text-muted mt-3 font-weight-bold font-size-sm">Overview of all franchisors</span>
                             </h3>
                             <div class="card-toolbar">
 
@@ -261,36 +261,37 @@
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    @foreach($data as $key => $row)
+                                    @if(isset($data['franchisors']) && $data['franchisors']->count() > 0)
+                                        @foreach($data['franchisors'] as $franchisor)
+                                            <tr>
+                                                <td>
+                                                    <span class="text-muted font-weight-bold">A{{ $franchisor->id }}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="text-muted font-weight-bold">{{ $franchisor->brand_name ?? 'N/A' }}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="text-muted font-weight-bold">{{ $franchisor->name }}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="text-muted font-weight-bold">{{ $franchisor->email }}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="text-muted font-weight-bold">{{ $franchisor->city ?? 'N/A' }}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="text-muted font-weight-bold">${{ number_format($franchisor->getTotalSales(), 2) }}</span>
+                                                </td>
+                                                <td>
+                                                    <!-- Add action buttons here if needed -->
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    @else
                                         <tr>
-                                            <td >
-                                                <span class="text-muted  font-weight-bold">A{{ $row['id']  }}  </span>
-                                            </td>
-                                            <td>
-                                                <span class="text-muted  font-weight-bold">{{ $row['brand_name']  }} </span>
-                                            </td>
-
-                                            <td >
-                                                <span class="text-muted  font-weight-bold">{{ $row['name']  }}  </span>
-                                            </td>
-
-                                            <td >
-                                                <span class="text-muted  font-weight-bold">{{ $row['email']  }}  </span>
-                                            </td>
-
-
-                                            <td >
-                                                <span class="text-muted  font-weight-bold">    </span>
-                                            </td>
-                                            <td >
-                                                <span class="text-muted  font-weight-bold"> $6000   </span>
-                                            </td>
-
-
-
-
+                                            <td colspan="7" class="text-center text-muted">No franchisors found</td>
                                         </tr>
-                                    @endforeach
+                                    @endif
                                     </tbody>
                                 </table>
                             </div>
@@ -338,7 +339,7 @@
             var i = 0;
             var series = [];
             while (i < count) {
-                var x = Math.floor(Math.random() * (750 - 1 + 1)) + 1;;
+                var x = Math.floor(Math.random() * (750 - 1 + 1)) + 1;
                 var y = Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min;
                 var z = Math.floor(Math.random() * (75 - 15 + 1)) + 15;
 
