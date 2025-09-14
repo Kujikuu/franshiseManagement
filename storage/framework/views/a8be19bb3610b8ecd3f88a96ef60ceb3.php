@@ -1,6 +1,4 @@
-@extends('layouts.master')
-
-@section('styles')
+<?php $__env->startSection('styles'); ?>
     <style>
 
         .datatable-head  .datatable-cell span{
@@ -23,8 +21,8 @@
 
         }
     </style>
-@endsection
-@section('content')
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('content'); ?>
     <!--begin::Subheader-->
     <div class="container subheader py-3 py-lg-8 subheader-transparent" id="kt_subheader">
         <div class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap">
@@ -44,7 +42,7 @@
             <div class="d-flex align-items-center flex-wrap">
                 <!--begin::Button-->
 
-            @include('layouts.profile_button')
+            <?php echo $__env->make('layouts.profile_button', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
             <!--end::Button-->
             </div>
@@ -56,14 +54,14 @@
     <div class="container">
         <div class="h3 text-center">
 
-            @if($errors->any())
-                @foreach ($errors->all() as $error)
+            <?php if($errors->any()): ?>
+                <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <span class="text-danger" role="alert">
-                        <strong style="font-size: 13px; font-weight: 400;">{{ $error }}</strong><br>
+                        <strong style="font-size: 13px; font-weight: 400;"><?php echo e($error); ?></strong><br>
                     </span>
-                @endforeach
-            @endif
-            @include('flash::message')
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            <?php endif; ?>
+            <?php echo $__env->make('flash::message', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
         </div>
         <br>
         <div class="row ">
@@ -124,7 +122,7 @@
                                     <!--begin::Tab Content-->
                                     <div class="tab-pane active" id="kt_apps_projects_view_tab_2" role="tabpanel">
                                         <form class="form" method="POST" action="" enctype="multipart/form-data">
-                                            @csrf
+                                            <?php echo csrf_field(); ?>
 
                                             <div class="card-body">
                                                 <div class="form-group">
@@ -169,7 +167,7 @@
                                     <!--begin::Tab Content-->
                                     <div class="tab-pane" id="kt_apps_projects_view_tab_3" role="tabpanel">
                                         <form class="form" method="POST" action="" enctype="multipart/form-data">
-                                            @csrf
+                                            <?php echo csrf_field(); ?>
 
                                             <div class="card-body">
                                                 <div class="row">
@@ -544,9 +542,9 @@
 
 
     <!--end::Entry-->
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('scripts')
+<?php $__env->startSection('scripts'); ?>
 
     <!--begin::Page Vendors(used by this page)-->
     <script src="//www.amcharts.com/lib/3/amcharts.js"></script>
@@ -709,4 +707,5 @@
 
     </script>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /Users/afifi/franshiseManagement/resources/views/dashboard/myfranchise.blade.php ENDPATH**/ ?>

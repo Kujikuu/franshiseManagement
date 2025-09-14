@@ -27,7 +27,7 @@ class DatabaseSeeder extends Seeder
     {
         // Create default admin user
         $admin = User::firstOrCreate(
-            ['email' => 'admin@franloop.com.sa'],
+            ['email' => 'admin@franloop.sa'],
             [
                 'name' => 'Admin User',
                 'password' => Hash::make('password'),
@@ -38,6 +38,58 @@ class DatabaseSeeder extends Seeder
                 'city' => 'Riyadh',
                 'address' => 'King Fahd Road, Riyadh',
                 'type' => 'admin',
+                'status' => 'active',
+                'email_verified_at' => now(),
+            ]
+        );
+
+        $franchisor = User::firstOrCreate(
+            ['email' => 'franchisor@franloop.sa'],
+            [
+                'name' => 'Franchisor User',
+                'password' => Hash::make('password'),
+                'brand_name' => 'Franloop',
+                'phone' => '+966-11-123-4567',
+                'country' => 'Saudi Arabia',
+                'province' => 'Riyadh Province',
+                'city' => 'Riyadh',
+                'address' => 'King Fahd Road, Riyadh',
+                'type' => 'franchisor',
+                'status' => 'active',
+                'email_verified_at' => now(),
+            ]
+        );
+
+        $franchisee = User::firstOrCreate(
+            ['email' => 'franchisee@franloop.sa'],
+            [
+                'name' => 'Franchisee User',
+                'password' => Hash::make('password'),
+                'brand_name' => 'Franloop',
+                'phone' => '+966-11-123-4567',
+                'country' => 'Saudi Arabia',
+                'province' => 'Riyadh Province',
+                'city' => 'Riyadh',
+                'address' => 'King Fahd Road, Riyadh',
+                'type' => 'franchisee',
+                'status' => 'active',
+                'email_verified_at' => now(),
+            ]
+        );
+
+
+        $sales = User::firstOrCreate(
+            ['email' => 'sales@franloop.com.sa'],
+            [
+                'name' => 'Sales User',
+                'password' => Hash::make('password'),
+                'brand_name' => 'Franloop',
+                'phone' => '+966-11-123-4567',
+                'country' => 'Saudi Arabia',
+                'province' => 'Riyadh Province',
+                'city' => 'Riyadh',
+                'address' => 'King Fahd Road, Riyadh',
+                'type' => 'sales',
                 'status' => 'active',
                 'email_verified_at' => now(),
             ]

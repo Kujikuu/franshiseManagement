@@ -1,6 +1,4 @@
-@extends('layouts.master')
-
-@section('styles')
+<?php $__env->startSection('styles'); ?>
 
     <style>
         .table.table-head-custom thead tr, .table.table-head-custom thead th{
@@ -9,8 +7,8 @@
         }
     </style>
 
-@endsection
-@section('content')
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('content'); ?>
 
     <!--begin::Subheader-->
     <div class="subheader py-3 py-lg-8 subheader-transparent" id="kt_subheader">
@@ -29,7 +27,7 @@
             <!--begin::Toolbar-->
             <div class="d-flex align-items-center flex-wrap">
                 <!--begin::Button-->
-            @include('layouts.profile_button')
+            <?php echo $__env->make('layouts.profile_button', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
                 <!--end::Button-->
             </div>
@@ -44,14 +42,14 @@
             <!--begin::Advance Table Widget 1-->
             <div class="h3 text-center">
 
-                @if($errors->any())
-                    @foreach ($errors->all() as $error)
+                <?php if($errors->any()): ?>
+                    <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <span class="text-danger" role="alert">
-                        <strong style="font-size: 13px; font-weight: 400;">{{ $error }}</strong><br>
+                        <strong style="font-size: 13px; font-weight: 400;"><?php echo e($error); ?></strong><br>
                     </span>
-                    @endforeach
-                @endif
-                @include('flash::message')
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                <?php endif; ?>
+                <?php echo $__env->make('flash::message', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
             </div>
             <br>
 
@@ -159,43 +157,43 @@
                             </tr>
                             </thead>
                             <tbody>
-                            @forelse($data as $key => $row)
+                            <?php $__empty_1 = true; $__currentLoopData = $data; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $row): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <tr>
                                 <td>
-                                    <span class="text-muted font-weight-bold">A{{ $row->id }}</span>
+                                    <span class="text-muted font-weight-bold">A<?php echo e($row->id); ?></span>
                                 </td>
 
                                 <td>
-                                    <span class="text-muted font-weight-bold">{{ $row->first_name }}</span>
+                                    <span class="text-muted font-weight-bold"><?php echo e($row->first_name); ?></span>
                                 </td>
 
                                 <td>
-                                    <span class="text-muted font-weight-bold">{{ $row->last_name }}</span>
+                                    <span class="text-muted font-weight-bold"><?php echo e($row->last_name); ?></span>
                                 </td>
 
                                 <td>
-                                    <span class="text-muted font-weight-bold">{{ $row->email }}</span>
+                                    <span class="text-muted font-weight-bold"><?php echo e($row->email); ?></span>
                                 </td>
 
                                 <td>
-                                    <span class="text-muted font-weight-bold">{{ $row->contact_number }}</span>
+                                    <span class="text-muted font-weight-bold"><?php echo e($row->contact_number); ?></span>
                                 </td>
 
                                 <td>
-                                    <span class="text-muted font-weight-bold">{{ $row->country }}</span>
+                                    <span class="text-muted font-weight-bold"><?php echo e($row->country); ?></span>
                                 </td>
                                 <td>
-                                    <span class="text-muted font-weight-bold">{{ $row->province }}</span>
+                                    <span class="text-muted font-weight-bold"><?php echo e($row->province); ?></span>
                                 </td>
 
                                 <td>
-                                    <span class="text-muted font-weight-bold">{{ $row->city }}</span>
+                                    <span class="text-muted font-weight-bold"><?php echo e($row->city); ?></span>
                                 </td>
 
 
                                 <td>
 
-                                    <a href="#" data-toggle="modal" data-target="#edit_item-{{ $row->id }}"  class="btn btn-icon btn-light btn-hover-primary btn-sm">
+                                    <a href="#" data-toggle="modal" data-target="#edit_item-<?php echo e($row->id); ?>"  class="btn btn-icon btn-light btn-hover-primary btn-sm">
                                         <span class="svg-icon svg-icon-md svg-icon-primary">
                                             <!--begin::Svg Icon | path:assets/media/svg/icons/Communication/Write.svg-->
                                             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
@@ -209,7 +207,7 @@
                                         </span>
                                     </a>
 
-                                    <a href="#" data-toggle="modal" data-target="#delete_record_modal" data-action="{{ route('associate.delete' , $row->id ?? $row->id) }}" data-id="{{ $row->id }}" class="open_delete_modal btn btn-icon btn-light btn-hover-primary btn-sm">
+                                    <a href="#" data-toggle="modal" data-target="#delete_record_modal" data-action="<?php echo e(route('associate.delete' , $row->id ?? $row->id)); ?>" data-id="<?php echo e($row->id); ?>" class="open_delete_modal btn btn-icon btn-light btn-hover-primary btn-sm">
                                         <span class="svg-icon svg-icon-md svg-icon-primary">
                                                 <!--begin::Svg Icon | path:assets/media/svg/icons/General/Trash.svg-->
                                                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
@@ -225,11 +223,11 @@
                                 </td>
 
                             </tr>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr>
                                     <td colspan="9" class="text-center text-muted">No associates found.</td>
                                 </tr>
-                            @endforelse
+                            <?php endif; ?>
                             </tbody>
                         </table>
                     </div>
@@ -255,8 +253,8 @@
                 </div>
                 <div class="modal-body">
                     <!--begin::Form-->
-                    <form class="form" method="POST" action="{{ route('associate.store') }}" enctype="multipart/form-data">
-                        @csrf
+                    <form class="form" method="POST" action="<?php echo e(route('associate.store')); ?>" enctype="multipart/form-data">
+                        <?php echo csrf_field(); ?>
                         <div class="card-body">
 
                             <div  class="row form-group">
@@ -520,8 +518,8 @@
         </div>
     </div>
 
-    @foreach($data as $row)
-        <div class="modal fade" id="edit_item-{{ $row->id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalSizeSm" aria-hidden="true">
+    <?php $__currentLoopData = $data; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $row): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <div class="modal fade" id="edit_item-<?php echo e($row->id); ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalSizeSm" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-md" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -532,44 +530,44 @@
                     </div>
                     <div class="modal-body">
                         <!--begin::Form-->
-                        <form class="form" method="POST" action="{{ route('associate.store') }}" enctype="multipart/form-data">
-                            @csrf
+                        <form class="form" method="POST" action="<?php echo e(route('associate.store')); ?>" enctype="multipart/form-data">
+                            <?php echo csrf_field(); ?>
                             <div class="card-body">
 
                                 <div  class="row form-group">
 
-                                    <input style="text-transform: capitalize" hidden type="text" class="form-control" name="id" value="{{ $row->id }}">
+                                    <input style="text-transform: capitalize" hidden type="text" class="form-control" name="id" value="<?php echo e($row->id); ?>">
 
 
                                     <div class="col-12 col-md-12">
                                         <br>
                                         <label  class=" form-control-label">First Name</label>
-                                        <input required type="text" class="form-control" name="first_name" value="{{ old('first_name', $row->first_name) }}">
+                                        <input required type="text" class="form-control" name="first_name" value="<?php echo e(old('first_name', $row->first_name)); ?>">
                                     </div>
 
                                     <div class="col-12 col-md-12">
                                         <br>
                                         <label  class=" form-control-label">Last Name</label>
-                                        <input required type="text" class="form-control" name="last_name" value="{{ old('last_name', $row->last_name) }}">
+                                        <input required type="text" class="form-control" name="last_name" value="<?php echo e(old('last_name', $row->last_name)); ?>">
                                     </div>
 
 
                                     <div class="col-12 col-md-12">
                                         <br>
                                         <label  class=" form-control-label">Email</label>
-                                        <input required type="email" class="form-control" name="email" value="{{ old('email', $row->email) }}">
+                                        <input required type="email" class="form-control" name="email" value="<?php echo e(old('email', $row->email)); ?>">
                                     </div>
 
                                     <div class="col-12 col-md-12">
                                         <br>
                                         <label  class=" form-control-label">Contact Number</label>
-                                        <input required type="text" class="form-control" name="contact_number" value="{{ old('contact_number', $row->contact_number) }}">
+                                        <input required type="text" class="form-control" name="contact_number" value="<?php echo e(old('contact_number', $row->contact_number)); ?>">
                                     </div>
 
                                     <div class="col-12 col-md-12">
                                         <br>
                                         <label  class=" form-control-label">Country</label>
-                                        <select name="country" class="form-control country-select" data-current="{{ old('country', $row->country) }}">
+                                        <select name="country" class="form-control country-select" data-current="<?php echo e(old('country', $row->country)); ?>">
                                             <option>Afghanistan</option>
                                             <option>Albania</option>
                                             <option>Algeria</option>
@@ -771,13 +769,13 @@
                                     <div class="col-12 col-md-12">
                                         <br>
                                         <label  class=" form-control-label">Province</label>
-                                        <input type="text" class="form-control" name="province" value="{{ old('province', $row->province) }}">
+                                        <input type="text" class="form-control" name="province" value="<?php echo e(old('province', $row->province)); ?>">
                                     </div>
 
                                     <div class="col-12 col-md-12">
                                         <br>
                                         <label  class=" form-control-label">City</label>
-                                        <input type="text" class="form-control" name="city" value="{{ old('city', $row->city) }}">
+                                        <input type="text" class="form-control" name="city" value="<?php echo e(old('city', $row->city)); ?>">
                                     </div>
 
 
@@ -796,12 +794,12 @@
                 </div>
             </div>
         </div>
-    @endforeach
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('scripts')
+<?php $__env->startSection('scripts'); ?>
 
 <script>
     // Set country select in edit modal to the current value when it's shown
@@ -815,4 +813,5 @@
     });
 </script>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /Users/afifi/franshiseManagement/resources/views/dashboard/associates.blade.php ENDPATH**/ ?>

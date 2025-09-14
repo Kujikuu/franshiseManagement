@@ -14,9 +14,9 @@ class AssociateController extends Controller
      */
     public function index()
     {
-        $data = Associate::paginate(20);
+        $data = Associate::paginate(10);
 
-        return view('dashboard.associates' , compact('data'));
+        return view('dashboard.associates', compact('data'));
 
     }
 
@@ -38,20 +38,20 @@ class AssociateController extends Controller
      */
     public function store(Request $request)
     {
-        $firstName  = $request->get('first_name');
-        $lastName   = $request->get('last_name');
+        $firstName = $request->get('first_name');
+        $lastName = $request->get('last_name');
 
         // Save user data (without updating the email if the user already exists)
         Associate::updateOrCreate(
             ['id' => $request->get('id')],
             [
-                'first_name'      => $firstName ,
-                'last_name'      =>  $lastName,
-                'contact_number'     => $request->get('contact_number'),
-                'country'   => $request->get('country'),
-                'province'  => $request->get('province'),
-                'city'      => $request->get('city'),
-                'email'     => $request->get('email'),
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'contact_number' => $request->get('contact_number'),
+                'country' => $request->get('country'),
+                'province' => $request->get('province'),
+                'city' => $request->get('city'),
+                'email' => $request->get('email'),
             ]
         );
 
