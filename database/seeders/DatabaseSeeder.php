@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'admin@franloop.sa'],
             [
                 'name' => 'Admin User',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('Yousif1991$$'),
                 'brand_name' => 'Franloop',
                 'phone' => '+966-11-123-4567',
                 'country' => 'Saudi Arabia',
@@ -47,7 +47,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'franchisor@franloop.sa'],
             [
                 'name' => 'Franchisor User',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('Yousif1991$$'),
                 'brand_name' => 'Franloop',
                 'phone' => '+966-11-123-4567',
                 'country' => 'Saudi Arabia',
@@ -64,7 +64,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'franchisee@franloop.sa'],
             [
                 'name' => 'Franchisee User',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('Yousif1991$$'),
                 'brand_name' => 'Franloop',
                 'phone' => '+966-11-123-4567',
                 'country' => 'Saudi Arabia',
@@ -82,7 +82,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'sales@franloop.com.sa'],
             [
                 'name' => 'Sales User',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('Yousif1991$$'),
                 'brand_name' => 'Franloop',
                 'phone' => '+966-11-123-4567',
                 'country' => 'Saudi Arabia',
